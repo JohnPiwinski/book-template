@@ -1,0 +1,144 @@
+\documentclass[9pt]{memoir}
+
+\usepackage[osf]{mathpazo}
+\usepackage[mathcal,mathbf]{euler}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx,sidecap,tikz}
+%\usepackage{siunitx} % automatic number formatting, decimal point alignment
+
+% To get lining figures in tables set by siunitx, which apparently uses the
+% \mathrm font instead of \mathnormal
+\SetMathAlphabet{\mathrm}{normal}{U}{eur}{m}{n}
+
+% =========================
+% = Setting up the layout =
+% =========================
+
+% With a 9pt body font we want a little extra line spacing (I mean *leading*)
+\setSingleSpace{1.2}
+\SingleSpacing
+
+\setstocksize{9in}{6in}
+\settrimmedsize{\stockheight}{\stockwidth}{*}
+\settrims{0pt}{0pt}
+
+\settypeblocksize{46\baselineskip}{4in}{*}
+\setlrmargins{*}{0.5in}{*}
+\setulmargins{*}{0.5in}{*}
+
+\setheadfoot{\baselineskip}{\baselineskip} % headheight and footskip
+\setheaderspaces{0.5in}{*}{*} % headdrop, headsep, and ratio
+
+\checkandfixthelayout[lines]
+
+% Set up custom headers and footers
+\makepagestyle{stylish}
+\copypagestyle{stylish}{headings}
+\makerunningwidth{stylish}{5in}
+\makeheadposition{stylish}{flushleft}{flushright}{}{}
+\pagestyle{stylish}
+
+
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+    \usepackage[default]{sourcesanspro}
+  \usepackage{sourcecodepro}
+  \else % if not pdftex
+    \usepackage[default]{sourcesanspro}
+  \usepackage{sourcecodepro}
+
+  % XeLaTeX specific adjustments for straight quotes: https://tex.stackexchange.com/a/354887
+  % This issue is already fixed (see https://github.com/silkeh/latex-sourcecodepro/pull/5) but the
+  % fix is still unreleased.
+  % TODO: Remove this workaround when the new version of sourcecodepro is released on CTAN.
+  \ifxetex
+    \makeatletter
+    \defaultfontfeatures[\ttfamily]
+      { Numbers   = \sourcecodepro@figurestyle,
+        Scale     = \SourceCodePro@scale,
+        Extension = .otf }
+    \setmonofont
+      [ UprightFont    = *-\sourcecodepro@regstyle,
+        ItalicFont     = *-\sourcecodepro@regstyle It,
+        BoldFont       = *-\sourcecodepro@boldstyle,
+        BoldItalicFont = *-\sourcecodepro@boldstyle It ]
+      {SourceCodePro}
+    \makeatother
+  \fi
+  \fi
+
+
+% ============================
+% = Table of contents tweaks =
+% ============================
+\renewcommand*{\contentsname}{Table of Contents}
+\setsecnumdepth{subsubsection}
+\settocdepth{subsection}
+
+% ============
+% = Chapters =
+% ============
+\newcommand{\swelledrule}{%
+    \tikz \filldraw[scale=.015,very thin]%
+    (0,0) -- (100,1) -- (200,1) -- (300,0) --%
+    (200,-1) -- (100,-1) -- cycle;}
+\makeatletter
+\makechapterstyle{grady}{%
+    \setlength{\beforechapskip}{0pt}
+    \renewcommand*{\chapnamefont}{\large\centering\scshape}
+    \renewcommand*{\chapnumfont}{\large}
+    \renewcommand*{\printchapternum}{%
+        \chapnumfont \ifanappendix \thechapter \else \numtoName{\c@chapter}\fi}
+    \renewcommand*{\printchapternonum}{%
+        \vphantom{\printchaptername}%
+        \vphantom{\chapnumfont 1}%
+        \afterchapternum
+        \vskip -\onelineskip}
+    \renewcommand*{\chaptitlefont}{\Huge\itshape}
+    \renewcommand*{\printchaptertitle}[1]{%
+        \centering\chaptitlefont ##1\par\swelledrule}}
+\makeatother
+\chapterstyle{grady}
+
+% See below, after introduction, for \clearforchapter
+
+% Prevent page numbers from appearing on chapter pages
+\aliaspagestyle{chapter}{empty}
+
+% ===================
+% = Marginal labels =
+% ===================
+\strictpagecheck % Turn on robust page checking
+\captiondelim{} % Don't print a colon after "Figure #.#"
+
+\makeatletter
+\renewcommand{\fnum@figure}{%
+    \checkoddpage%
+    \ifoddpage%
+        \makebox[0pt][l]{\hspace{-1in}{\scshape\figurename~\thefigure}}%
+    \else
+        \makebox[0pt][r]{{\scshape\figurename~\thefigure}\hspace*{-5in}}%
+    \fi%
+    }
+\renewcommand{\fnum@table}{%
+    \checkoddpage%
+    \ifoddpage%
+        \makebox[0pt][l]{\hspace{-1in}{\scshape\tablename~\thetable}}%
+    \else
+        \makebox[0pt][r]{{\scshape\tablename~\thetable}\hspace*{-5in}}%
+    \fi%
+    }
+\let\mytagform@=\tagform@
+\def\tagform@#1{%
+\checkoddpage%
+    \ifoddpage%
+    \makebox[1sp][l]{\hspace{-5in}\maketag@@@{(\ignorespaces#1 \unskip \@@italiccorr)}}%
+    \else
+    \makebox[1sp][r]{\maketag@@@{(\ignorespaces#1 \unskip \@@italiccorr)}\hspace*{-1in}}%
+    \fi%
+    }
+\renewcommand{\eqref}[1]{\textup{\mytagform@{\ref{#1}}}}
+\makeatother
+
+\usetikzlibrary{arrows,positioning,decorations.pathmorphing,trees}
+
